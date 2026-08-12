@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #ffffff;
+    color: #0B1B3B;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition active:scale-[.98];
+  }
+  .btn-primary {
+    @apply btn bg-brand-700 text-white hover:bg-brand-800;
+  }
+  .btn-outline {
+    @apply btn border border-brand-200 text-brand-700 hover:border-brand-700;
+  }
+  .btn-ghost {
+    @apply btn text-brand-700 hover:bg-brand-50;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-card;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition;
+  }
+  .chip-active { @apply bg-brand-700 text-white border-brand-700; }
+  .chip-idle   { @apply bg-white text-brand-700 border-brand-100 hover:border-brand-300; }
+  .input {
+    @apply w-full rounded-xl border border-brand-100 bg-white px-4 py-3 text-sm outline-none transition focus:border-brand-700 focus:ring-2 focus:ring-brand-100;
+  }
+  .label { @apply block text-xs font-semibold uppercase tracking-wide text-brand-400 mb-1.5; }
+}
+
+/* Hide scrollbar on horizontal chips */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Slide-in for drawers */
+@keyframes drawerIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn    { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.animate-drawer { animation: drawerIn .28s cubic-bezier(.2,.8,.2,1) both; }
+.animate-fade   { animation: fadeIn .2s ease-out both; }
+.animate-pop    { animation: popIn .22s cubic-bezier(.2,.8,.2,1) both; }
