@@ -1,8 +1,68 @@
-// Namuna mahsulotlar. Firebase konfiguratsiya qilinsa, Firestore'dagi `products`
-// kolleksiyasi shu tuzilishga mos bo'lishi kerak.
+// Namuna mahsulotlar. Firebase/Supabase konfiguratsiya qilinsa,
+// DB'dagi `products` kolleksiyasi shu tuzilishga mos bo'lishi kerak.
+//
+// Rasmlar — SVG placeholder (kiyim ikonasi + nom + brend). Admin panelda
+// yangi mahsulot qo'shishda haqiqiy rasmlar Supabase Storage'ga yuklanadi
+// va bu placeholderlar o'rniga chiroyli photolar chiqadi.
 
-const img = (id, w = 800) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`
+const CATEGORY_ICON = {
+  shirts: 'M60 40h60l-8 20-10 100h-24l-10-100-8-20zM70 40l-15-8 20-12h50l20 12-15 8',
+  tshirts: 'M55 55h70v90h-70zM55 55l-15 15 10 15 15-10zM125 55l15 15-10 15-15-10',
+  pants: 'M65 40h50l5 130h-25l-8-70-8 70h-24z',
+  suits: 'M55 40h70v20l-15 90h-40l-15-90zM90 40v70',
+  jackets: 'M50 45h80v100h-80zM90 45v100M50 45l-10 15v70l10 5M130 45l10 15v70l-10 5',
+  knitwear: 'M50 55h80l-5 90h-70zM60 55v-8a10 10 0 0 1 20 0M100 55v-8a10 10 0 0 1 20 0',
+  shoes: 'M40 100c0-15 25-30 60-30s60 15 60 30v10H40zM40 110h120M50 90l10-10M70 85l10-10',
+  accessories: 'M60 60c0-15 15-25 30-25s30 10 30 25v20h-60zM50 80h80l5 60h-90z'
+}
+
+function catIcon(cat) {
+  return CATEGORY_ICON[cat] || CATEGORY_ICON.shirts
+}
+
+function esc(s = '') {
+  return String(s).replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]))
+}
+
+function trunc(s, n) { return s.length > n ? s.slice(0, n - 1) + '…' : s }
+
+// Har rasm — 3:4 nisbatda, brend rangi bilan gradient
+function img(product, variant = 0) {
+  const grads = [
+    ['#08152E', '#1A2D5B'],
+    ['#0B1B3B', '#2F467A'],
+    ['#050E1F', '#586C9A']
+  ]
+  const [c1, c2] = grads[variant % 3]
+  const name = trunc(product.name.uz, 26)
+  const icon = catIcon(product.category)
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${c1}"/>
+        <stop offset="100%" stop-color="${c2}"/>
+      </linearGradient>
+      <radialGradient id="r" cx="0.7" cy="0.3" r="0.8">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="600" height="800" fill="url(#g)"/>
+    <rect width="600" height="800" fill="url(#r)"/>
+    <g transform="translate(210 250) scale(2.2)" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="${icon}"/>
+    </g>
+    <text x="300" y="640" text-anchor="middle" fill="#ffffff" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="34" opacity="0.98">${esc(name)}</text>
+    <text x="300" y="680" text-anchor="middle" fill="#ffffff" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="20" opacity="0.7">${esc(product.brand)}</text>
+    <text x="300" y="760" text-anchor="middle" fill="#ffffff" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="14" letter-spacing="8" opacity="0.85">VIQOR</text>
+  </svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
+function withImages(p) {
+  return { ...p, images: [img(p, 0), img(p, 1), img(p, 2)] }
+}
 
 export const CATEGORIES = [
   { id: 'all', key: 'all' },
@@ -29,8 +89,7 @@ export const COLORS = [
 ]
 
 export const PRODUCTS = [
-  {
-    id: 'p01', category: 'shirts', brand: 'Viqor',
+  { id: 'p01', category: 'shirts', brand: 'Viqor',
     name: { uz: 'Klassik oq ko\'ylak', ru: 'Классическая белая рубашка' },
     price: 349000, oldPrice: 429000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['S', 'M', 'L'],
@@ -39,11 +98,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Ish va kundalik uslub uchun mos, yumshoq paxtadan tikilgan klassik ko\'ylak.',
       ru: 'Классическая рубашка из мягкого хлопка для работы и повседневной носки.'
-    },
-    images: [img('1602810318383-e386cc2a3ccf'), img('1596755094514-f87e34085b2c'), img('1620012253295-c15cc3e65df4')]
-  },
-  {
-    id: 'p02', category: 'shirts', brand: 'Massimo Dutti',
+    } },
+  { id: 'p02', category: 'shirts', brand: 'Massimo Dutti',
     name: { uz: 'Slim-fit ko\'k ko\'ylak', ru: 'Slim-fit синяя рубашка' },
     price: 429000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['M', 'L', 'XL'],
@@ -52,11 +108,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Slim-fit qirqim, nozik va yengil mato. Kunlik va ofis uchun.',
       ru: 'Slim-fit крой, лёгкая и приятная ткань. Для офиса и на каждый день.'
-    },
-    images: [img('1603252109303-2751441dd157'), img('1520975916090-3105956dac38')]
-  },
-  {
-    id: 'p03', category: 'tshirts', brand: 'Uniqlo',
+    } },
+  { id: 'p03', category: 'tshirts', brand: 'Uniqlo',
     name: { uz: 'Basic qora futbolka', ru: 'Базовая чёрная футболка' },
     price: 129000, oldPrice: 169000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['S', 'M', 'L', 'XL'],
@@ -65,11 +118,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Har kuni kiyish uchun mukammal — yumshoq va shakli buzilmaydigan.',
       ru: 'Идеально для повседневной носки — мягкая и держит форму.'
-    },
-    images: [img('1521572163474-6864f9cf17ab'), img('1583743814966-8936f5b7be1a')]
-  },
-  {
-    id: 'p04', category: 'tshirts', brand: 'H&M',
+    } },
+  { id: 'p04', category: 'tshirts', brand: 'H&M',
     name: { uz: 'Oversized futbolka', ru: 'Oversized футболка' },
     price: 179000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['M', 'L'],
@@ -78,11 +128,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Zamonaviy street-style uchun oversized qirqim.',
       ru: 'Oversized крой в стиле современного street-style.'
-    },
-    images: [img('1622445275463-afa2ab738c34'), img('1618354691373-d851c5c3a990')]
-  },
-  {
-    id: 'p05', category: 'pants', brand: 'Zara',
+    } },
+  { id: 'p05', category: 'pants', brand: 'Zara',
     name: { uz: 'Chino shim, bej', ru: 'Чиносы, бежевые' },
     price: 389000,
     sizes: ['46', '48', '50', '52', '54'], availableSizes: ['48', '50', '52'],
@@ -91,11 +138,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Straight-fit chino shim. Klassika bilan zamonaviylik uyg\'unligi.',
       ru: 'Прямой крой chino. Классика с современным характером.'
-    },
-    images: [img('1624378439575-d8705ad7ae80'), img('1473966968600-fa801b869a1a')]
-  },
-  {
-    id: 'p06', category: 'pants', brand: 'Boss',
+    } },
+  { id: 'p06', category: 'pants', brand: 'Boss',
     name: { uz: 'Klassik ish shim', ru: 'Классические брюки' },
     price: 549000, oldPrice: 649000,
     sizes: ['46', '48', '50', '52', '54', '56'], availableSizes: ['48', '50', '52', '54'],
@@ -104,11 +148,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Ofis va biznes uchun mos, sifatli materialdan.',
       ru: 'Для офиса и деловых встреч, из качественного материала.'
-    },
-    images: [img('1594938291221-94f18cbb5660'), img('1541099649105-f69ad21f3246')]
-  },
-  {
-    id: 'p07', category: 'suits', brand: 'Boss',
+    } },
+  { id: 'p07', category: 'suits', brand: 'Boss',
     name: { uz: 'Ikki qismli kostyum', ru: 'Костюм-двойка' },
     price: 1990000, oldPrice: 2450000,
     sizes: ['46', '48', '50', '52', '54'], availableSizes: ['48', '50', '52'],
@@ -117,11 +158,8 @@ export const PRODUCTS = [
     description: {
       uz: 'To\'y va rasmiy tadbirlar uchun elegant kostyum.',
       ru: 'Элегантный костюм для свадеб и официальных мероприятий.'
-    },
-    images: [img('1594938298603-c8148c4dae35'), img('1507679799987-c73779587ccf')]
-  },
-  {
-    id: 'p08', category: 'jackets', brand: 'Zara',
+    } },
+  { id: 'p08', category: 'jackets', brand: 'Zara',
     name: { uz: 'Bomber kurtka', ru: 'Куртка-бомбер' },
     price: 749000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['M', 'L', 'XL'],
@@ -130,11 +168,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Yengil va sport uslubidagi bomber. Kuz-bahor uchun.',
       ru: 'Лёгкий бомбер в спортивном стиле. Для весны и осени.'
-    },
-    images: [img('1591047139829-d91aecb6caea'), img('1551028719-00167b16eac5')]
-  },
-  {
-    id: 'p09', category: 'jackets', brand: 'Massimo Dutti',
+    } },
+  { id: 'p09', category: 'jackets', brand: 'Massimo Dutti',
     name: { uz: 'Uzun jun palto', ru: 'Длинное шерстяное пальто' },
     price: 1590000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['M', 'L'],
@@ -143,11 +178,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Sifatli va issiq palto. Ish va rasmiy uslub uchun.',
       ru: 'Качественное и тёплое пальто. Для делового и официального стиля.'
-    },
-    images: [img('1520975954732-35dd22299614'), img('1544022613-e87ca75a784a')]
-  },
-  {
-    id: 'p10', category: 'knitwear', brand: 'Uniqlo',
+    } },
+  { id: 'p10', category: 'knitwear', brand: 'Uniqlo',
     name: { uz: 'Merinos svitari', ru: 'Свитер из мериноса' },
     price: 459000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['S', 'M', 'L', 'XL'],
@@ -156,11 +188,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Yumshoq va issiq merinos svitari.',
       ru: 'Мягкий и тёплый свитер из мериноса.'
-    },
-    images: [img('1620799140408-edc6dcb6d633'), img('1608744882201-52a7f7f3dfa2')]
-  },
-  {
-    id: 'p11', category: 'knitwear', brand: 'H&M',
+    } },
+  { id: 'p11', category: 'knitwear', brand: 'H&M',
     name: { uz: 'Kardigan', ru: 'Кардиган' },
     price: 379000, oldPrice: 449000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['S', 'M'],
@@ -169,11 +198,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Yengil va zamonaviy kardigan.',
       ru: 'Лёгкий и современный кардиган.'
-    },
-    images: [img('1516762689617-e1cffcef479d'), img('1606813907291-d86efa9b94db')]
-  },
-  {
-    id: 'p12', category: 'shoes', brand: 'Zara',
+    } },
+  { id: 'p12', category: 'shoes', brand: 'Zara',
     name: { uz: 'Charm klassik tuflilar', ru: 'Классические кожаные туфли' },
     price: 890000,
     sizes: ['40', '41', '42', '43', '44'], availableSizes: ['41', '42', '43'],
@@ -182,11 +208,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Rasmiy tadbirlar uchun klassik dizayn.',
       ru: 'Классический дизайн для официальных случаев.'
-    },
-    images: [img('1614252369475-531eba835eb1'), img('1449505278894-297fdb3edbc1')]
-  },
-  {
-    id: 'p13', category: 'shoes', brand: 'Uniqlo',
+    } },
+  { id: 'p13', category: 'shoes', brand: 'Uniqlo',
     name: { uz: 'Oq krossovkalar', ru: 'Белые кроссовки' },
     price: 690000, oldPrice: 790000,
     sizes: ['40', '41', '42', '43', '44'], availableSizes: ['40', '41', '42', '43', '44'],
@@ -195,11 +218,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Har kuni kiyish uchun qulay oq krossovkalar.',
       ru: 'Удобные белые кроссовки на каждый день.'
-    },
-    images: [img('1542291026-7eec264c27ff'), img('1595950653106-6c9ebd614d3a')]
-  },
-  {
-    id: 'p14', category: 'accessories', brand: 'Boss',
+    } },
+  { id: 'p14', category: 'accessories', brand: 'Boss',
     name: { uz: 'Charm kamar', ru: 'Кожаный ремень' },
     price: 259000,
     sizes: ['S', 'M', 'L'], availableSizes: ['M', 'L'],
@@ -208,11 +228,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Zamonaviy va bardoshli charm kamar.',
       ru: 'Современный и прочный кожаный ремень.'
-    },
-    images: [img('1624222247344-550fb60583dc'), img('1614252235316-8c857d38b5f4')]
-  },
-  {
-    id: 'p15', category: 'accessories', brand: 'Zara',
+    } },
+  { id: 'p15', category: 'accessories', brand: 'Zara',
     name: { uz: 'Ipak galstuk', ru: 'Шёлковый галстук' },
     price: 189000,
     sizes: ['One'], availableSizes: ['One'],
@@ -221,11 +238,8 @@ export const PRODUCTS = [
     description: {
       uz: 'Rasmiy uslub uchun mukammal galstuk.',
       ru: 'Идеальный галстук для формального стиля.'
-    },
-    images: [img('1607541572562-9d94c76c9218'), img('1621786030484-4c855eed6974')]
-  },
-  {
-    id: 'p16', category: 'tshirts', brand: 'Viqor',
+    } },
+  { id: 'p16', category: 'tshirts', brand: 'Viqor',
     name: { uz: 'Polo futbolka', ru: 'Поло-футболка' },
     price: 249000,
     sizes: ['S', 'M', 'L', 'XL'], availableSizes: ['S', 'M', 'L'],
@@ -234,7 +248,5 @@ export const PRODUCTS = [
     description: {
       uz: 'Klassika bilan sport uslub o\'rtasidagi mukammal tanlov.',
       ru: 'Идеальный выбор между классикой и спортивным стилем.'
-    },
-    images: [img('1586790170083-2f9ceadc732d'), img('1618354691229-e11c9d43e2b3')]
-  }
-]
+    } }
+].map(withImages)
