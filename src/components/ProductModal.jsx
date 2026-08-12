@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { PRODUCTS, COLORS } from '../data/products'
+import { COLORS } from '../data/products'
+import { useProducts } from '../store/productsStore'
 import { useI18n, fmtSom } from '../hooks/useI18n'
 import { useUI } from '../store/uiStore'
 import { useCart } from '../store/cartStore'
@@ -21,7 +22,7 @@ export function ProductModal() {
   const [color, setColor] = useState(null)
   const [sizeGuide, setSizeGuide] = useState(false)
 
-  const product = productId ? PRODUCTS.find(p => p.id === productId) : null
+  const product = useProducts(s => productId ? s.items.find(p => p.id === productId) : null)
 
   useEffect(() => {
     if (product) {

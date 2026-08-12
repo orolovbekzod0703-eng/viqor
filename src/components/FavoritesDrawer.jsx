@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useFavorites } from '../store/favoritesStore'
 import { useUI } from '../store/uiStore'
 import { useI18n, fmtSom } from '../hooks/useI18n'
-import { PRODUCTS } from '../data/products'
+import { useProducts } from '../store/productsStore'
 import { EmptyState } from './EmptyState'
 import { IconClose, IconHeart, IconTrash } from './Icons'
 
@@ -13,6 +13,7 @@ export function FavoritesDrawer() {
   const openProduct = useUI(s => s.openProduct)
   const ids = useFavorites(s => s.ids)
   const toggle = useFavorites(s => s.toggle)
+  const allProducts = useProducts(s => s.items)
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -21,7 +22,7 @@ export function FavoritesDrawer() {
 
   if (!open) return null
 
-  const items = ids.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean)
+  const items = ids.map(id => allProducts.find(p => p.id === id)).filter(Boolean)
 
   return (
     <div className="fixed inset-0 z-40">

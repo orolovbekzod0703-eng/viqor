@@ -1,95 +1,117 @@
 # Viqor — Erkaklar kiyimlari onlayn do'koni
 
-Zamonaviy, mobile-first e-commerce sayti. React + Vite + Tailwind CSS, Zustand
-holat boshqaruvi va Firebase (Firestore + Storage) backend.
+Zamonaviy, mobile-first e-commerce sayti. React + Vite + Tailwind + Zustand,
+backend **Supabase** (Postgres + Auth + Storage). Admin panel bilan.
 
 ## Xususiyatlar
 
-- 🇺🇿 / 🇷🇺 — UZ/RU tillar (yuqoridagi tugma orqali almashadi)
-- 🛍️ Mahsulotlar grid'i, kategoriya chip'lari, filtrlar (o'lcham, rang, brend, narx)
-- 🔍 Qidiruv
-- 💗 Sevimlilar (♡)
-- 🛒 Chetdan chiqadigan savat (drawer)
-- 📦 Bosqichma-bosqich checkout (yetkazib berish / manzil / kontakt / to'lov / tasdiq)
-- ✅ Buyurtma tasdiqi + buyurtma raqami
-- 📱 To'liq responsiv (telefon / planshet / kompyuter)
-- ✨ Yumshoq animatsiyalar, hover effektlari
-- 🔥 Firebase bilan buyurtmalarni saqlash (`orders` kolleksiyasi)
-- 📴 Firebase konfiguratsiyasiz ham ishlaydi (buyurtma lokal saqlanadi — dev/demo uchun)
+- 🇺🇿 / 🇷🇺 UZ/RU tillar
+- 🛍️ Mahsulotlar, kategoriya chip'lari, filtrlar (o'lcham/rang/brend/narx), qidiruv
+- 💗 Sevimlilar · 🛒 Chetdan chiqadigan savat
+- 📦 5-bosqichli checkout (Payme/Click/Uzum/naqd)
+- 🔐 **Admin panel** (`/admin`) — Supabase Auth
+  - Buyurtmalar ro'yxati, status filtri, status o'zgartirish, tafsilotlar
+  - Mahsulotlar CRUD (qo'shish/tahrir/o'chirish), rasm upload
+- 📱 To'liq responsiv, animatsiyalar
 
-## Boshlash
+## 1. Boshlash (lokal)
 
 ```bash
 npm install
-cp .env.example .env   # va o'z Firebase kalitlaringizni qo'ying
+copy .env.example .env
 npm run dev
 ```
 
-Sayt `http://localhost:5173` da ochiladi.
+`.env` da Supabase kalitlarini to'ldirmasangiz ham sayt namuna mahsulotlar bilan
+ishlaydi (buyurtmalar `localStorage` da saqlanadi, admin panelga kirish
+bo'lmaydi — demo rejimi).
 
-## Environment o'zgaruvchilari
+## 2. Supabase sozlash
 
-Loyihaning ildizida `.env` fayl yarating (namunani `.env.example` dan ko'chirib oling):
+1. [supabase.com](https://supabase.com) da yangi loyiha yarating.
+2. **Project Settings → API** dan `URL` va `anon public` kalitni oling.
+3. `.env` ga qo'ying:
 
-```
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
+   ```
+   VITE_SUPABASE_URL=https://xxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJ...
+   ```
 
-> **Eslatma:** `.env` fayl `.gitignore` ga qo'shilgan — hech qachon commit qilmang.
-> Agar `VITE_FIREBASE_API_KEY` bo'sh bo'lsa, sayt namuna ma'lumotlar bilan
-> ishlaydi va buyurtmalar `localStorage` da saqlanadi (demo rejimi).
+4. **SQL Editor** ga o'ting va [`supabase/schema.sql`](supabase/schema.sql)
+   faylining ichidagi hamma narsani ko'chirib qo'yib, **Run** bosing. Bu:
+   - `products`, `orders`, `admins` jadvallarini yaratadi
+   - RLS (Row Level Security) qoidalarini yoqadi
+   - `viqor` nomli public storage bucket yaratadi
+5. (Ixtiyoriy) Namuna 3 ta mahsulot qo'shish uchun
+   [`supabase/seed.sql`](supabase/seed.sql) ni ham ishga tushiring.
 
-## Firebase sozlash
+## 3. Admin foydalanuvchi yaratish
 
-1. [console.firebase.google.com](https://console.firebase.google.com) da yangi loyiha yarating.
-2. **Firestore Database** ni yoqing (production mode yoki test mode).
-3. **Storage** ni yoqing (mahsulot rasmlari uchun).
-4. Web app qo'shing va konfiguratsiya kalitlarini `.env` fayliga ko'chiring.
-5. Firestore da quyidagi kolleksiyalarni yarating:
-   - `products` — mahsulotlar (tuzilishi `src/data/products.js` dagi kabi)
-   - `orders` — buyurtmalar (avtomatik yaratiladi)
+1. Supabase Dashboard → **Authentication → Users → Add user → Create new user**.
+   Email va parol kiriting.
+2. Yaratilgan user'ning **UID** ni ko'chirib oling.
+3. **SQL Editor** ga o'ting:
 
-**Firestore qoidalari** (misol — production'da qattiqroq qoidalar qo'llang):
+   ```sql
+   insert into public.admins (user_id) values ('SIZNING-USER-UID');
+   ```
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /products/{doc}   { allow read: if true; }
-    match /orders/{doc}     { allow create: if true; }
-  }
-}
-```
+4. `/admin/login` ga o'ting va o'sha email/parol bilan kiring.
 
-## Vercel'ga deploy
+> Adminni olib tashlash: `delete from public.admins where user_id = '...'`
 
-1. Kodni **GitHub**ga push qiling.
-2. [vercel.com](https://vercel.com) da `New Project` → repositoriyani import qiling.
-3. Framework Preset avtomatik `Vite` deb aniqlanadi (Build Command: `npm run build`, Output: `dist`).
-4. **Environment Variables** bo'limida `.env` dagi barcha `VITE_FIREBASE_*` kalitlarini qo'shing.
-5. **Deploy** tugmasini bosing.
+## 4. Vercel'ga deploy
 
-SPA marshrutlari uchun `vercel.json` fayli bor — barcha yo'llar `index.html`ga qayta yo'naltiriladi.
+1. Kodni **GitHub**ga push qiling (allaqachon qilingan bo'lsa `git push`).
+2. [vercel.com](https://vercel.com/new) → repositoriyani import qiling.
+3. Framework `Vite` avtomatik aniqlanadi (build: `npm run build`, output: `dist`).
+4. **Environment Variables** da ikkita kalitni qo'shing:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+5. **Deploy**.
+
+SPA marshrutlari (`/admin`, `/admin/login`) uchun `vercel.json` da rewrites
+sozlangan — barcha yo'llar `index.html`ga yo'naltiriladi.
+
+> **Vercel Preview URL** yoki custom domain qo'shsangiz, uni Supabase
+> **Authentication → URL Configuration → Site URL / Additional Redirect URLs**
+> ga ham qo'shishni unutmang.
 
 ## Loyiha tuzilishi
 
 ```
 src/
-  components/     # UI komponentlar
-  data/           # Namuna mahsulotlar (Firebase o'rniga)
-  hooks/          # useI18n
-  i18n/           # Tarjimalar (uz/ru)
-  store/          # Zustand store'lar
-  firebase.js     # Firebase config va yordamchi funksiyalar
-  App.jsx
+  components/       # Umumiy UI komponentlar
+  pages/
+    Store.jsx       # Mijoz sahifasi (do'kon)
+    admin/          # Admin panel sahifalari
+      AdminApp.jsx  # Layout + guard + routing
+      AdminLogin.jsx
+      AdminOrders.jsx
+      AdminProducts.jsx
+      ProductForm.jsx
+  data/products.js  # Namuna mahsulotlar (Supabase yo'q bo'lsa fallback)
+  hooks/
+    useI18n.js
+    useAuth.js      # Supabase auth + admin tekshiruv
+  i18n/             # Tarjimalar (uz/ru)
+  store/            # Zustand: cart, favorites, ui, products
+  supabase.js       # Supabase client + CRUD helpers
+  App.jsx           # Router
   main.jsx
-  index.css
+supabase/
+  schema.sql        # Jadval, RLS, storage
+  seed.sql          # Namuna ma'lumotlar (ixtiyoriy)
 ```
+
+## Ma'lumotlar modeli (qisqacha)
+
+- `products` — mahsulotlar, `name_uz/name_ru`, `sizes[]`, `colors[]`,
+  `images[]` (URL'lar), `available_sizes[]` (sotuvda bor bo'lganlari)
+- `orders` — buyurtmalar, `items` (jsonb), `customer`, `delivery`, `status`
+  (`new`|`processing`|`shipped`|`delivered`|`cancelled`)
+- `admins` — admin bo'lgan `auth.users` ro'yxati
+- Storage: `viqor` bucket (public read, admin write)
 
 ## Skriptlar
 

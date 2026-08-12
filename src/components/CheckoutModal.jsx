@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useI18n, fmtSom } from '../hooks/useI18n'
 import { useUI } from '../store/uiStore'
 import { useCart } from '../store/cartStore'
-import { submitOrder } from '../firebase'
+import { submitOrder } from '../supabase'
 import { IconCheck, IconClose, IconStore, IconTruck } from './Icons'
 
 const STEPS = 5
