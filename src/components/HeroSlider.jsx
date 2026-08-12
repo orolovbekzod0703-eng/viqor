@@ -17,10 +17,10 @@ export function HeroSlider() {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-soft">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-soft isolate">
         <div
-          className="flex transition-transform duration-700 ease-out"
-          style={{ transform: `translateX(-${i * 100}%)` }}
+          className="flex transition-transform duration-700 ease-out will-change-transform"
+          style={{ transform: `translate3d(-${i * 100}%, 0, 0)` }}
         >
           {slides.map((s, idx) => (
             <div key={idx} className="w-full shrink-0 relative">

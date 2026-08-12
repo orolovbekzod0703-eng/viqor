@@ -6,7 +6,7 @@ import { Header } from '../components/Header'
 import { PromoBanner } from '../components/PromoBanner'
 import { HeroSlider } from '../components/HeroSlider'
 import { CategoryChips } from '../components/CategoryChips'
-import { FilterPanel } from '../components/FilterPanel'
+import { FilterPanel, countActiveFilters } from '../components/FilterPanel'
 import { ProductGrid } from '../components/ProductGrid'
 import { CartDrawer } from '../components/CartDrawer'
 import { FavoritesDrawer } from '../components/FavoritesDrawer'
@@ -24,6 +24,7 @@ export default function Store() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [filters, setFilters] = useState({ sizes: [], colors: [], brands: [], min: '', max: '' })
+  const [filterOpen, setFilterOpen] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -57,22 +58,30 @@ export default function Store() {
       <Header search={search} setSearch={setSearch} />
       <main className="flex-1">
         <HeroSlider />
-        <CategoryChips active={category} onChange={setCategory} />
+        <CategoryChips
+          active={category}
+          onChange={setCategory}
+          onFilterClick={() => setFilterOpen(true)}
+          activeFilterCount={countActiveFilters(filters)}
+        />
 
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 flex gap-6">
-          <FilterPanel filters={filters} setFilters={setFilters} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm text-brand-400">
-                <b className="text-brand-700">{filtered.length}</b> {lang === 'uz' ? 'ta mahsulot' : 'товаров'}
-              </div>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm text-brand-400">
+              <b className="text-brand-700">{filtered.length}</b> {lang === 'uz' ? 'ta mahsulot' : 'товаров'}
             </div>
-            <ProductGrid products={filtered} />
           </div>
+          <ProductGrid products={filtered} />
         </section>
       </main>
       <Footer />
 
+      <FilterPanel
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        filters={filters}
+        setFilters={setFilters}
+      />
       <CartDrawer />
       <FavoritesDrawer />
       <ProductModal />
