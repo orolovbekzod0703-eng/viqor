@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PRODUCTS as SAMPLE_PRODUCTS } from '../data/products'
-import { fetchProducts } from '../supabase'
+import { fetchProducts, fetchAllRatings } from '../supabase'
+import { useRatings } from '../store/ratingsStore'
 import { Header } from '../components/Header'
+import { PromoBanner } from '../components/PromoBanner'
 import { HeroSlider } from '../components/HeroSlider'
 import { CategoryChips } from '../components/CategoryChips'
 import { FilterPanel } from '../components/FilterPanel'
@@ -27,6 +29,7 @@ export default function Store() {
     let alive = true
     setProducts(SAMPLE_PRODUCTS)
     fetchProducts().then(list => { if (alive && list?.length) setProducts(list) })
+    fetchAllRatings().then(map => { if (alive) useRatings.getState().setMap(map) })
     return () => { alive = false }
   }, [])
 
@@ -50,6 +53,7 @@ export default function Store() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <PromoBanner />
       <Header search={search} setSearch={setSearch} />
       <main className="flex-1">
         <HeroSlider />

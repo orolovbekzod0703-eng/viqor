@@ -6,12 +6,18 @@ backend **Supabase** (Postgres + Auth + Storage). Admin panel bilan.
 ## Xususiyatlar
 
 - 🇺🇿 / 🇷🇺 UZ/RU tillar
-- 🛍️ Mahsulotlar, kategoriya chip'lari, filtrlar (o'lcham/rang/brend/narx), qidiruv
+- 🛍️ Mahsulotlar, kategoriya chip'lari, filtrlar (o'lcham/rang/brend/narx), qidiruv (autocomplete)
+- 🏷️ **Yorliqlar** (Yangi, Bestseller, Cheklangan, Aksiya) badges
+- ⭐ **Sharhlar va reyting** (5 yulduz) — login talab
 - 💗 Sevimlilar · 🛒 Chetdan chiqadigan savat
+- 👤 **Mijoz akkaunti** — ro'yxatdan o'tish, kirish, buyurtmalar tarixi, sevimlilar
 - 📦 5-bosqichli checkout (Payme/Click/Uzum/naqd)
+- 🗺️ **Xarita** (OpenStreetMap + Leaflet) — manzilni xaritada tanlash
+- 🔥 **Aksiya banneri hisoblagich bilan** — sozlanuvchi tugash sanasi
 - 🔐 **Admin panel** (`/admin`) — Supabase Auth
-  - Buyurtmalar ro'yxati, status filtri, status o'zgartirish, tafsilotlar
-  - Mahsulotlar CRUD (qo'shish/tahrir/o'chirish), rasm upload
+  - **Dashboard** — statistika (kunlik/haftalik sotuv, 30 kun grafigi, top mahsulotlar, statuslar)
+  - **Buyurtmalar** — ro'yxat, status filtri, status o'zgartirish, tafsilotlar
+  - **Mahsulotlar** — CRUD, rasm upload, yorliqlar tanlash
 - 📱 To'liq responsiv, animatsiyalar
 
 ## 1. Boshlash (lokal)
@@ -42,7 +48,13 @@ bo'lmaydi — demo rejimi).
    - `products`, `orders`, `admins` jadvallarini yaratadi
    - RLS (Row Level Security) qoidalarini yoqadi
    - `viqor` nomli public storage bucket yaratadi
-5. (Ixtiyoriy) Namuna 3 ta mahsulot qo'shish uchun
+5. **Yangi:** So'ng [`supabase/migrations/001_features.sql`](supabase/migrations/001_features.sql)
+   faylini ham ishga tushiring — bu:
+   - `products.labels` ustunini qo'shadi
+   - `orders.user_id` ni qo'shadi (mijoz akkauntlari uchun)
+   - `profiles` jadvalini yaratadi (mijoz nomi/telefon saqlash)
+   - `reviews` jadvalini va `product_ratings` view yaratadi (sharhlar/reyting)
+6. (Ixtiyoriy) Namuna 3 ta mahsulot qo'shish uchun
    [`supabase/seed.sql`](supabase/seed.sql) ni ham ishga tushiring.
 
 ## 3. Admin foydalanuvchi yaratish
@@ -81,28 +93,50 @@ sozlangan — barcha yo'llar `index.html`ga yo'naltiriladi.
 
 ```
 src/
-  components/       # Umumiy UI komponentlar
+  components/        # Umumiy UI komponentlar
+    AddressMap.jsx   # Leaflet xarita
+    PromoBanner.jsx  # Yuqoridagi countdown banner
+    Reviews.jsx      # Sharhlar bo'limi (modal ichida)
+    SearchAutocomplete.jsx
+    ...
   pages/
-    Store.jsx       # Mijoz sahifasi (do'kon)
-    admin/          # Admin panel sahifalari
-      AdminApp.jsx  # Layout + guard + routing
+    Store.jsx        # Mijoz sahifasi (do'kon)
+    Login.jsx        # Mijoz login
+    Register.jsx     # Ro'yxatdan o'tish
+    Account.jsx      # Akkaunt (buyurtmalar, sevimlilar, profil)
+    admin/           # Admin panel sahifalari
+      AdminApp.jsx      # Layout + guard + routing
       AdminLogin.jsx
+      AdminDashboard.jsx  # Statistika
       AdminOrders.jsx
       AdminProducts.jsx
       ProductForm.jsx
-  data/products.js  # Namuna mahsulotlar (Supabase yo'q bo'lsa fallback)
+  data/
+    products.js      # Namuna mahsulotlar (Supabase yo'q bo'lsa fallback)
+    labels.js        # Yorliq metadata (yangi/bestseller/...)
   hooks/
     useI18n.js
-    useAuth.js      # Supabase auth + admin tekshiruv
-  i18n/             # Tarjimalar (uz/ru)
-  store/            # Zustand: cart, favorites, ui, products
-  supabase.js       # Supabase client + CRUD helpers
-  App.jsx           # Router
+    useAuth.js       # Supabase auth + admin tekshiruv
+  i18n/              # Tarjimalar (uz/ru)
+  store/             # Zustand: cart, favorites, ui, products, ratings
+  supabase.js        # Supabase client + CRUD helpers
+  App.jsx            # Router
   main.jsx
 supabase/
-  schema.sql        # Jadval, RLS, storage
-  seed.sql          # Namuna ma'lumotlar (ixtiyoriy)
+  schema.sql               # Asosiy jadval, RLS, storage
+  migrations/001_features.sql  # Labels, profiles, reviews, user_id
+  seed.sql                 # Namuna ma'lumotlar (ixtiyoriy)
 ```
+
+## Aksiya bannerining tugash sanasini o'zgartirish
+
+`src/components/PromoBanner.jsx` faylida `PROMO_END` konstantasini o'zgartiring:
+
+```js
+const PROMO_END = new Date('2026-08-31T23:59:00+05:00').getTime()
+```
+
+Sana o'tib ketsa banner avtomatik yashiriladi.
 
 ## Ma'lumotlar modeli (qisqacha)
 

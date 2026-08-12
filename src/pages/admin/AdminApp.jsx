@@ -5,6 +5,7 @@ import { Logo } from '../../components/Logo'
 import { FullPageSpinner } from './AdminLogin'
 import AdminOrders from './AdminOrders'
 import AdminProducts from './AdminProducts'
+import AdminDashboard from './AdminDashboard'
 import { IconBag, IconClose } from '../../components/Icons'
 
 export default function AdminApp() {
@@ -21,10 +22,11 @@ export default function AdminApp() {
         <TopBar setMobileOpen={setMobileOpen} email={user.email} />
         <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">
           <Routes>
-            <Route index element={<Navigate to="orders" replace />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="products" element={<AdminProducts />} />
-            <Route path="*" element={<Navigate to="orders" replace />} />
+            <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </main>
       </div>
@@ -54,6 +56,7 @@ function Sidebar({ mobileOpen, setMobileOpen, email }) {
     <>
       <div className="text-brand-700 mb-6"><Logo /></div>
       <nav className="space-y-1">
+        <NavItem to="/admin/dashboard" active={isActive('/admin/dashboard')} icon={<IconChart />}>Dashboard</NavItem>
         <NavItem to="/admin/orders" active={isActive('/admin/orders')} icon={<IconBag />}>Buyurtmalar</NavItem>
         <NavItem to="/admin/products" active={isActive('/admin/products')} icon={<IconBox />}>Mahsulotlar</NavItem>
       </nav>
@@ -90,7 +93,9 @@ function Sidebar({ mobileOpen, setMobileOpen, email }) {
 
 function TopBar({ setMobileOpen, email }) {
   const loc = useLocation()
-  const title = loc.pathname.includes('/products') ? 'Mahsulotlar' : 'Buyurtmalar'
+  const title = loc.pathname.includes('/products') ? 'Mahsulotlar'
+              : loc.pathname.includes('/dashboard') ? 'Dashboard'
+              : 'Buyurtmalar'
   return (
     <header className="lg:hidden bg-white border-b border-brand-100 sticky top-0 z-30">
       <div className="h-14 px-4 flex items-center gap-3">
@@ -108,6 +113,20 @@ function IconBox() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 7l9-4 9 4v10l-9 4-9-4V7z" /><path d="M3 7l9 4 9-4M12 11v10" />
+    </svg>
+  )
+}
+function IconChart() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" /><path d="M7 15V9M12 15v-3M17 15V6" />
+    </svg>
+  )
+}
+function IconMap() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s-8-7-8-13a8 8 0 0 1 16 0c0 6-8 13-8 13z" /><circle cx="12" cy="9" r="3" />
     </svg>
   )
 }

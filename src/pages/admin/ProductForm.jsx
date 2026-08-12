@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { upsertProduct, uploadProductImage } from '../../supabase'
 import { BRANDS, CATEGORIES, COLORS } from '../../data/products'
+import { LABELS } from '../../data/labels'
 import { IconClose, IconPlus, IconTrash } from '../../components/Icons'
 
 const empty = {
@@ -13,6 +14,7 @@ const empty = {
   sizes: [],
   availableSizes: [],
   colors: [],
+  labels: [],
   composition: { uz: '', ru: '' },
   description: { uz: '', ru: '' },
   images: []
@@ -51,6 +53,9 @@ export default function ProductForm({ initial, onClose, onSaved }) {
   })
   const toggleColor = (c) => set({
     colors: form.colors.includes(c) ? form.colors.filter(x => x !== c) : [...form.colors, c]
+  })
+  const toggleLabel = (l) => set({
+    labels: form.labels.includes(l) ? form.labels.filter(x => x !== l) : [...form.labels, l]
   })
 
   const onFile = async (e) => {
@@ -175,6 +180,21 @@ export default function ProductForm({ initial, onClose, onSaved }) {
               <button onClick={addSize} className="btn-outline !py-2 !text-sm">Qo'shish</button>
             </div>
             <div className="text-xs text-brand-400 mt-1">Bosib qora → mavjud, oq (chizilgan) → mavjud emas</div>
+          </div>
+
+          <div>
+            <div className="label">Yorliqlar (labels)</div>
+            <div className="flex flex-wrap gap-2">
+              {LABELS.map(l => (
+                <button
+                  key={l.id}
+                  onClick={() => toggleLabel(l.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
+                    form.labels.includes(l.id) ? l.classes : 'bg-brand-50 text-brand-500 hover:text-brand-700'
+                  }`}
+                >{l.name.uz}</button>
+              ))}
+            </div>
           </div>
 
           <div>

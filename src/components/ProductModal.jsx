@@ -6,6 +6,7 @@ import { useUI } from '../store/uiStore'
 import { useCart } from '../store/cartStore'
 import { useFavorites } from '../store/favoritesStore'
 import { SizeGuideModal } from './SizeGuideModal'
+import { Reviews } from './Reviews'
 import { IconClose, IconHeart, IconBag } from './Icons'
 
 export function ProductModal() {
@@ -144,6 +145,8 @@ export function ProductModal() {
               <div className="label">{t.composition}</div>
               <p className="text-sm text-brand-500">{product.composition[lang]}</p>
             </div>
+
+            <Reviews productId={product.id} />
 
             <div className="mt-6 flex gap-2">
               <button

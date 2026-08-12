@@ -12,7 +12,6 @@ export const supabase = hasSupabase
 
 // ---- Products ----------------------------------------------------------
 
-// DB row -> frontend product shape
 export function rowToProduct(r) {
   return {
     id: r.id,
@@ -24,6 +23,7 @@ export function rowToProduct(r) {
     sizes: r.sizes || [],
     availableSizes: r.available_sizes || [],
     colors: r.colors || [],
+    labels: r.labels || [],
     composition: { uz: r.composition_uz || '', ru: r.composition_ru || '' },
     description: { uz: r.description_uz || '', ru: r.description_ru || '' },
     images: r.images || []
@@ -42,6 +42,7 @@ export function productToRow(p) {
     sizes: p.sizes || [],
     available_sizes: p.availableSizes || [],
     colors: p.colors || [],
+    labels: p.labels || [],
     composition_uz: p.composition?.uz || '',
     composition_ru: p.composition?.ru || '',
     description_uz: p.description?.uz || '',
@@ -84,6 +85,7 @@ export async function submitOrder(order) {
     localStorage.setItem('viqor_orders', JSON.stringify(local))
     return rec.id
   }
+  const { data: { user } } = await supabase.auth.getUser()
   const { data, error } = await supabase
     .from('orders')
     .insert({
@@ -95,7 +97,8 @@ export async function submitOrder(order) {
       delivery: order.delivery,
       payment: order.payment,
       note: order.note || null,
-      lang: order.lang || 'uz'
+      lang: order.lang || 'uz',
+      user_id: user?.id || null
     })
     .select('id')
     .single()
@@ -110,6 +113,18 @@ export async function fetchOrders({ status } = {}) {
   const { data, error } = await q
   if (error) throw error
   return data
+}
+
+export async function fetchUserOrders() {
+  if (!hasSupabase) return []
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const { data, error } = await supabase
+    .from('orders').select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
 }
 
 export async function updateOrderStatus(id, status) {
@@ -132,6 +147,13 @@ export async function uploadProductImage(file) {
 
 // ---- Auth --------------------------------------------------------------
 
+export async function signUp(email, password, meta = {}) {
+  if (!hasSupabase) throw new Error('Supabase not configured')
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { data: meta } })
+  if (error) throw error
+  return data
+}
+
 export async function isCurrentUserAdmin() {
   if (!hasSupabase) return false
   const { data: { user } } = await supabase.auth.getUser()
@@ -139,4 +161,64 @@ export async function isCurrentUserAdmin() {
   const { data, error } = await supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
   if (error) { console.error('[isAdmin]', error); return false }
   return Boolean(data)
+}
+
+// ---- Profile -----------------------------------------------------------
+
+export async function fetchProfile() {
+  if (!hasSupabase) return null
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data, error } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle()
+  if (error) { console.error('[profile]', error); return null }
+  return data
+}
+
+export async function upsertProfile({ name, phone }) {
+  if (!hasSupabase) throw new Error('Supabase not configured')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not signed in')
+  const { error } = await supabase.from('profiles').upsert({
+    user_id: user.id, name, phone, updated_at: new Date().toISOString()
+  })
+  if (error) throw error
+}
+
+// ---- Reviews -----------------------------------------------------------
+
+export async function fetchReviews(productId) {
+  if (!hasSupabase) return []
+  const { data, error } = await supabase
+    .from('reviews').select('*').eq('product_id', productId)
+    .order('created_at', { ascending: false })
+  if (error) { console.error('[reviews]', error); return [] }
+  return data || []
+}
+
+export async function fetchAllRatings() {
+  if (!hasSupabase) return {}
+  const { data, error } = await supabase.from('product_ratings').select('*')
+  if (error) { console.error('[ratings]', error); return {} }
+  const map = {}
+  for (const r of data || []) map[r.product_id] = { avg: Number(r.avg_rating), count: r.reviews_count }
+  return map
+}
+
+export async function submitReview({ productId, rating, text }) {
+  if (!hasSupabase) throw new Error('Supabase not configured')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not signed in')
+  const { error } = await supabase.from('reviews').upsert({
+    product_id: productId, user_id: user.id, rating, text: text || null
+  }, { onConflict: 'product_id,user_id' })
+  if (error) throw error
+}
+
+export async function deleteMyReview(productId) {
+  if (!hasSupabase) throw new Error('Supabase not configured')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const { error } = await supabase.from('reviews')
+    .delete().eq('product_id', productId).eq('user_id', user.id)
+  if (error) throw error
 }

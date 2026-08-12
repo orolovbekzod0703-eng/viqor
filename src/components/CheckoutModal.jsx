@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useI18n, fmtSom } from '../hooks/useI18n'
 import { useUI } from '../store/uiStore'
 import { useCart } from '../store/cartStore'
-import { submitOrder } from '../supabase'
+import { submitOrder, fetchProfile } from '../supabase'
+import { useAuth } from '../hooks/useAuth'
+import { AddressMap } from './AddressMap'
 import { IconCheck, IconClose, IconStore, IconTruck } from './Icons'
 
 const STEPS = 5
@@ -18,15 +20,25 @@ export function CheckoutModal() {
 
   const [step, setStep] = useState(1)
   const [busy, setBusy] = useState(false)
+  const { user } = useAuth()
   const [form, setForm] = useState({
     method: 'delivery',
     city: '',
     street: '',
+    location: null,
     name: '',
     phone: '',
     payment: 'payme',
     note: ''
   })
+
+  useEffect(() => {
+    if (open && user) {
+      fetchProfile().then(p => {
+        if (p) setForm(f => ({ ...f, name: f.name || p.name || '', phone: f.phone || p.phone || '' }))
+      })
+    }
+  }, [open, user])
 
   useEffect(() => {
     if (open) { setStep(1); setBusy(false) }
@@ -61,7 +73,9 @@ export function CheckoutModal() {
         total,
         currency: 'UZS',
         customer: { name: form.name, phone: form.phone },
-        delivery: form.method === 'delivery' ? { city: form.city, street: form.street } : { pickup: true },
+        delivery: form.method === 'delivery'
+          ? { city: form.city, street: form.street, location: form.location || null }
+          : { pickup: true },
         payment: form.payment,
         note: form.note,
         lang
@@ -112,11 +126,20 @@ export function CheckoutModal() {
               <div className="space-y-3">
                 <div>
                   <div className="label">{t.city}</div>
-                  <input className="input" value={form.city} onChange={e => set({ city: e.target.value })} placeholder="Toshkent" />
+                  <input className="input" value={form.city} onChange={e => set({ city: e.target.value })} placeholder="Olmaliq" />
                 </div>
                 <div>
                   <div className="label">{t.street}</div>
                   <input className="input" value={form.street} onChange={e => set({ street: e.target.value })} />
+                </div>
+                <div>
+                  <div className="label">{lang === 'uz' ? 'Xaritada nuqta tanlang' : 'Отметьте точку на карте'}</div>
+                  <AddressMap value={form.location} onChange={(loc) => set({ location: loc })} />
+                  {form.location && (
+                    <div className="mt-1.5 text-xs text-brand-400">
+                      {form.location.lat.toFixed(5)}, {form.location.lng.toFixed(5)}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
