@@ -6,7 +6,7 @@ export function CategoryChips({ active, onChange }) {
   const label = (id) => id === 'all' ? t.all : t.categoriesList[id]
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
+    <section id="categories" className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 scroll-mt-24">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-bold text-brand-700">{t.categories}</h3>
       </div>

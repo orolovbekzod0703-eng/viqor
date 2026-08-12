@@ -5,6 +5,7 @@ import { signOut, useAuth } from '../hooks/useAuth'
 import { fmtSom, useI18n } from '../hooks/useI18n'
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
+import { PhoneInput } from '../components/PhoneInput'
 import { Loader } from './Login'
 import { useFavorites } from '../store/favoritesStore'
 import { useProducts, setProducts } from '../store/productsStore'
@@ -157,7 +158,7 @@ export default function Account() {
             </div>
             <div>
               <div className="label">{lang === 'uz' ? 'Telefon' : 'Телефон'}</div>
-              <input className="input" type="tel" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} placeholder="+998" />
+              <PhoneInput value={profile.phone} onChange={v => setProfile({ ...profile, phone: v })} />
             </div>
             <div>
               <div className="label">Email</div>

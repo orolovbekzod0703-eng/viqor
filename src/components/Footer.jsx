@@ -1,4 +1,6 @@
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useI18n } from '../hooks/useI18n'
+import { useUI } from '../store/uiStore'
 import { Logo } from './Logo'
 
 const TELEGRAM = 'https://t.me/Viqorwear_info'
@@ -8,6 +10,17 @@ const PHONE_FMT = '+998 90 000 41 11'
 
 export function Footer() {
   const { t, lang } = useI18n()
+  const nav = useNavigate()
+  const loc = useLocation()
+  const setCartOpen = useUI(s => s.setCartOpen)
+  const setFavoritesOpen = useUI(s => s.setFavoritesOpen)
+
+  const goCategories = () => {
+    const scroll = () => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (loc.pathname === '/') scroll()
+    else { nav('/'); setTimeout(scroll, 120) }
+  }
+
   return (
     <footer className="mt-16 border-t border-brand-100 bg-brand-50/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 grid gap-8 sm:grid-cols-3">
@@ -33,10 +46,16 @@ export function Footer() {
 
         <div>
           <div className="font-bold mb-3 text-sm">{lang === 'uz' ? "Do'kon" : 'Магазин'}</div>
-          <ul className="space-y-2 text-sm text-brand-500">
-            <li>{t.categories}</li>
-            <li>{t.favorites}</li>
-            <li>{t.cart}</li>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <FooterLink onClick={goCategories}>{t.categories}</FooterLink>
+            </li>
+            <li>
+              <FooterLink onClick={() => setFavoritesOpen(true)}>{t.favorites}</FooterLink>
+            </li>
+            <li>
+              <FooterLink onClick={() => setCartOpen(true)}>{t.cart}</FooterLink>
+            </li>
           </ul>
         </div>
 
@@ -58,6 +77,17 @@ export function Footer() {
       </div>
       <div className="border-t border-brand-100 py-4 text-center text-xs text-brand-400">{t.footer}</div>
     </footer>
+  )
+}
+
+function FooterLink({ onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-brand-500 hover:text-brand-700 transition text-left"
+    >
+      {children}
+    </button>
   )
 }
 

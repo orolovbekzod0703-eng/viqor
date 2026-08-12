@@ -4,6 +4,7 @@ import { signUp, upsertProfile, hasSupabase } from '../supabase'
 import { signIn, useAuth } from '../hooks/useAuth'
 import { AuthShell, Field, Warn, Loader } from './Login'
 import { useI18n } from '../hooks/useI18n'
+import { PhoneInput } from '../components/PhoneInput'
 
 export default function Register() {
   const { user, loading } = useAuth()
@@ -42,7 +43,10 @@ export default function Register() {
       {!hasSupabase && <Warn text="Supabase sozlanmagan" />}
       <form onSubmit={submit} className="mt-5 space-y-3">
         <Field label={lang === 'uz' ? 'Ism' : 'Имя'} value={form.name} onChange={v => set('name', v)} required />
-        <Field label={lang === 'uz' ? 'Telefon' : 'Телефон'} type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder="+998" />
+        <div>
+          <div className="label">{lang === 'uz' ? 'Telefon' : 'Телефон'}</div>
+          <PhoneInput value={form.phone} onChange={v => set('phone', v)} />
+        </div>
         <Field label="Email" type="email" value={form.email} onChange={v => set('email', v)} autoComplete="email" required />
         <Field label={lang === 'uz' ? 'Parol' : 'Пароль'} type="password" value={form.password} onChange={v => set('password', v)} autoComplete="new-password" minLength={6} required />
         {err && <div className="text-xs text-red-600">{err}</div>}

@@ -5,6 +5,7 @@ import { useCart } from '../store/cartStore'
 import { submitOrder, fetchProfile } from '../supabase'
 import { useAuth } from '../hooks/useAuth'
 import { AddressMap } from './AddressMap'
+import { PhoneInput } from './PhoneInput'
 import { IconCheck, IconClose, IconStore, IconTruck } from './Icons'
 
 const STEPS = 5
@@ -159,7 +160,7 @@ export function CheckoutModal() {
               </div>
               <div>
                 <div className="label">{t.phone}</div>
-                <input className="input" type="tel" placeholder="+998 __ ___ __ __" value={form.phone} onChange={e => set({ phone: e.target.value })} />
+                <PhoneInput value={form.phone} onChange={(v) => set({ phone: v })} />
               </div>
             </div>
           )}
