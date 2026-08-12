@@ -4,6 +4,7 @@ import { useUI } from '../store/uiStore'
 import { useI18n, fmtSom } from '../hooks/useI18n'
 import { EmptyState } from './EmptyState'
 import { IconBag, IconClose, IconMinus, IconPlus, IconTrash } from './Icons'
+import { SmartImg } from './SmartImg'
 
 export function CartDrawer() {
   const { t } = useI18n()
@@ -46,7 +47,7 @@ export function CartDrawer() {
               {items.map(i => (
                 <div key={i.key} className="flex gap-3">
                   <div className="w-20 h-24 rounded-lg overflow-hidden bg-brand-50 shrink-0">
-                    <img src={i.image} alt={i.name.uz} className="w-full h-full object-cover" />
+                    <SmartImg src={i.image} alt={i.name.uz} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[11px] uppercase tracking-wider text-brand-400 font-semibold">{i.brand}</div>

@@ -6,6 +6,7 @@ import { fmtSom, useI18n } from '../hooks/useI18n'
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
 import { PhoneInput } from '../components/PhoneInput'
+import { SmartImg } from '../components/SmartImg'
 import { Loader } from './Login'
 import { useFavorites } from '../store/favoritesStore'
 import { useProducts, setProducts } from '../store/productsStore'
@@ -145,7 +146,7 @@ export default function Account() {
               {favProducts.map(p => (
                 <button key={p.id} onClick={() => openProduct(p.id)} className="text-left">
                   <div className="aspect-[3/4] rounded-xl overflow-hidden bg-brand-50">
-                    <img src={p.images?.[0]} alt="" className="w-full h-full object-cover" />
+                    <SmartImg src={p.images?.[0]} product={p} alt="" className="w-full h-full object-cover" />
                   </div>
                   <div className="mt-2 text-sm font-semibold line-clamp-1">{p.name[lang]}</div>
                   <div className="text-sm font-bold">{fmtSom(p.price)}</div>

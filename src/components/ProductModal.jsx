@@ -7,6 +7,7 @@ import { useCart } from '../store/cartStore'
 import { useFavorites } from '../store/favoritesStore'
 import { SizeGuideModal } from './SizeGuideModal'
 import { Reviews } from './Reviews'
+import { SmartImg } from './SmartImg'
 import { IconClose, IconHeart, IconBag } from './Icons'
 
 export function ProductModal() {
@@ -65,7 +66,7 @@ export function ProductModal() {
         <div className="grid sm:grid-cols-2 gap-0 sm:gap-6 p-4 sm:p-6">
           <div>
             <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-brand-50">
-              <img src={product.images[imgIdx]} alt={product.name[lang]} className="w-full h-full object-cover" />
+              <SmartImg src={product.images[imgIdx]} product={product} alt={product.name[lang]} className="w-full h-full object-cover" />
             </div>
             {product.images.length > 1 && (
               <div className="mt-3 flex gap-2">
@@ -75,7 +76,7 @@ export function ProductModal() {
                     onClick={() => setImgIdx(i)}
                     className={`w-16 h-20 rounded-lg overflow-hidden border-2 transition ${i === imgIdx ? 'border-brand-700' : 'border-transparent opacity-70'}`}
                   >
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <SmartImg src={src} product={product} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

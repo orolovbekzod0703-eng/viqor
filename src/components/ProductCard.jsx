@@ -5,6 +5,7 @@ import { useI18n, fmtSom } from '../hooks/useI18n'
 import { IconHeart, IconBag } from './Icons'
 import { labelMeta } from '../data/labels'
 import { useRatings } from '../store/ratingsStore'
+import { SmartImg } from './SmartImg'
 
 export function ProductCard({ product }) {
   const { t, lang } = useI18n()
@@ -39,11 +40,11 @@ export function ProductCard({ product }) {
       className="group cursor-pointer flex flex-col"
     >
       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-brand-50">
-        <img
+        <SmartImg
           src={product.images[0]}
+          product={product}
           alt={product.name[lang]}
           className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-          loading="lazy"
         />
 
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">

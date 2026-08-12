@@ -5,6 +5,7 @@ import { useI18n, fmtSom } from '../hooks/useI18n'
 import { useProducts } from '../store/productsStore'
 import { EmptyState } from './EmptyState'
 import { IconClose, IconHeart, IconTrash } from './Icons'
+import { SmartImg } from './SmartImg'
 
 export function FavoritesDrawer() {
   const { t, lang } = useI18n()
@@ -47,7 +48,7 @@ export function FavoritesDrawer() {
             {items.map(p => (
               <div key={p.id} className="flex gap-3 items-center">
                 <button onClick={() => { setOpen(false); openProduct(p.id) }} className="w-20 h-24 rounded-lg overflow-hidden bg-brand-50 shrink-0">
-                  <img src={p.images[0]} alt={p.name[lang]} className="w-full h-full object-cover" />
+                  <SmartImg src={p.images[0]} product={p} alt={p.name[lang]} className="w-full h-full object-cover" />
                 </button>
                 <div className="flex-1 min-w-0">
                   <div className="text-[11px] uppercase tracking-wider text-brand-400 font-semibold">{p.brand}</div>

@@ -3,6 +3,7 @@ import { useProducts } from '../store/productsStore'
 import { useUI } from '../store/uiStore'
 import { fmtSom, useI18n } from '../hooks/useI18n'
 import { IconSearch } from './Icons'
+import { SmartImg } from './SmartImg'
 
 export function SearchAutocomplete({ value, onChange, placeholder }) {
   const { lang } = useI18n()
@@ -51,7 +52,7 @@ export function SearchAutocomplete({ value, onChange, placeholder }) {
               className="flex items-center gap-3 w-full px-3 py-2.5 hover:bg-brand-50 text-left transition"
             >
               <div className="w-10 h-12 rounded-lg overflow-hidden bg-brand-50 shrink-0">
-                {p.images?.[0] && <img src={p.images[0]} alt="" className="w-full h-full object-cover" />}
+                {p.images?.[0] && <SmartImg src={p.images[0]} product={p} alt="" className="w-full h-full object-cover" />}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-brand-400 uppercase tracking-wide font-semibold">{p.brand}</div>
