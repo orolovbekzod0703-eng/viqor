@@ -70,6 +70,11 @@ export default function Account() {
     <div className="min-h-screen flex flex-col">
       <Header search="" setSearch={() => {}} />
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-500 hover:text-brand-700 mb-4 transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          {lang === 'uz' ? "Do'konga qaytish" : 'Вернуться в магазин'}
+        </Link>
+
         <div className="flex items-start justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl font-extrabold">{lang === 'uz' ? 'Mening akkauntim' : 'Мой аккаунт'}</h1>

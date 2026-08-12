@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useI18n } from '../hooks/useI18n'
 import { useUI } from '../store/uiStore'
 import { Logo } from './Logo'
@@ -47,6 +47,11 @@ export function Footer() {
         <div>
           <div className="font-bold mb-3 text-sm">{lang === 'uz' ? "Do'kon" : 'Магазин'}</div>
           <ul className="space-y-2 text-sm">
+            <li>
+              <Link to="/" className="text-brand-500 hover:text-brand-700 transition">
+                {lang === 'uz' ? 'Bosh sahifa' : 'Главная'}
+              </Link>
+            </li>
             <li>
               <FooterLink onClick={goCategories}>{t.categories}</FooterLink>
             </li>

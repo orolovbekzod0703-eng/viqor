@@ -97,6 +97,7 @@ function UserMenu() {
                 <div className="text-xs text-brand-400">{lang === 'uz' ? 'Kirgan' : 'Вошли как'}</div>
                 <div className="text-sm font-semibold truncate">{user.email}</div>
               </div>
+              <MenuLink to="/" onClick={() => setOpen(false)}>{lang === 'uz' ? "Do'kon" : 'Магазин'}</MenuLink>
               <MenuLink to="/account" onClick={() => setOpen(false)}>{lang === 'uz' ? 'Akkauntim' : 'Мой аккаунт'}</MenuLink>
               <button
                 onClick={async () => { setOpen(false); await signOut() }}
