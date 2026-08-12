@@ -19,15 +19,15 @@ export function Header({ search, setSearch }) {
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-brand-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center gap-3 sm:gap-5 h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
+        <div className="flex items-center gap-2 sm:gap-5 h-16">
           <Link to="/" className="text-brand-700 shrink-0"><Logo /></Link>
 
           <div className="hidden md:flex flex-1 max-w-lg">
             <SearchAutocomplete value={search} onChange={setSearch} placeholder={t.search} />
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-3">
             <LanguageSwitch />
             <UserMenu />
             <IconBtn onClick={() => setFavoritesOpen(true)} count={favCount} label={t.favorites}>
@@ -52,7 +52,7 @@ function IconBtn({ children, count, label, onClick }) {
     <button
       aria-label={label}
       onClick={onClick}
-      className="relative w-11 h-11 rounded-full text-brand-700 hover:bg-brand-50 flex items-center justify-center transition"
+      className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full text-brand-700 hover:bg-brand-50 flex items-center justify-center transition"
     >
       {children}
       {count > 0 && (
@@ -81,7 +81,7 @@ function UserMenu() {
       <button
         aria-label="account"
         onClick={() => setOpen(v => !v)}
-        className="w-11 h-11 rounded-full text-brand-700 hover:bg-brand-50 flex items-center justify-center transition"
+        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full text-brand-700 hover:bg-brand-50 flex items-center justify-center transition"
       >
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="8" r="4" />
@@ -90,7 +90,7 @@ function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-lg border border-brand-100 overflow-hidden animate-pop">
+        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-brand-100 overflow-hidden animate-pop z-[60]">
           {user ? (
             <>
               <div className="px-4 py-3 border-b border-brand-100">
